@@ -179,6 +179,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			}
 		}
 
+
 		if (proxy != nullptr)
 		{
 			proxy->lastPacketReceivedTime = Time.time;
@@ -190,11 +191,27 @@ void ModuleNetworkingServer::onUpdate()
 {
 	if (state == ServerState::Listening)
 	{
+		secondsSinceLastPing += Time.deltaTime;
 		// Replication
-		for (ClientProxy &clientProxy : clientProxies)
+		for (ClientProxy& clientProxy : clientProxies)
 		{
 			if (clientProxy.connected)
 			{
+				if (Time.time - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
+				{
+					destroyClientProxy(&clientProxy);
+				}
+
+
+				if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
+				{
+					OutputMemoryStream ping;
+					ping << ServerMessage::Ping;
+
+					sendPacket(ping, clientProxy.address);
+				}
+
+
 				OutputMemoryStream packet;
 				packet << ServerMessage::Replication;
 
@@ -202,6 +219,9 @@ void ModuleNetworkingServer::onUpdate()
 				//              has pending data, write and send a replication packet to this client.
 			}
 		}
+
+		if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
+			secondsSinceLastPing = .0f;
 	}
 }
 
