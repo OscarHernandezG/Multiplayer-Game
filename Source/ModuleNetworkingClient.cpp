@@ -153,44 +153,66 @@ void ModuleNetworkingClient::onUpdate()
 	}
 	else if (state == ClientState::Playing)
 	{
-		secondsSinceLastInputDelivery += Time.deltaTime;
+		lastPacketReceivedTime += Time.deltaTime;
 
-		if (inputDataBack - inputDataFront < ArrayCount(inputData))
+		// Disconect from server since we have no response
+		if (lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
 		{
-			uint32 currentInputData = inputDataBack++;
-			InputPacketData &inputPacketData = inputData[currentInputData % ArrayCount(inputData)];
-			inputPacketData.sequenceNumber = currentInputData;
-			inputPacketData.horizontalAxis = Input.horizontalAxis;
-			inputPacketData.verticalAxis = Input.verticalAxis;
-			inputPacketData.buttonBits = packInputControllerButtons(Input);
+			disconnect();
+		}
+		else
+		{
+			secondsSinceLastInputDelivery += Time.deltaTime;
+			secondsSinceLastPing += Time.deltaTime;
 
-			// Create packet (if there's input and the input delivery interval exceeded)
-			if (secondsSinceLastInputDelivery > inputDeliveryIntervalSeconds)
+			// Send ping to server
+			if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
 			{
-				secondsSinceLastInputDelivery = 0.0f;
+				secondsSinceLastPing = 0.f;
 
-				OutputMemoryStream packet;
-				packet << ClientMessage::Input;
+				OutputMemoryStream ping;
+				ping << ClientMessage::Ping;
 
-				for (uint32 i = inputDataFront; i < inputDataBack; ++i)
+				sendPacket(ping, serverAddress);
+			}
+
+			if (inputDataBack - inputDataFront < ArrayCount(inputData))
+			{
+				uint32 currentInputData = inputDataBack++;
+				InputPacketData& inputPacketData = inputData[currentInputData % ArrayCount(inputData)];
+				inputPacketData.sequenceNumber = currentInputData;
+				inputPacketData.horizontalAxis = Input.horizontalAxis;
+				inputPacketData.verticalAxis = Input.verticalAxis;
+				inputPacketData.buttonBits = packInputControllerButtons(Input);
+
+				// Create packet (if there's input and the input delivery interval exceeded)
+				if (secondsSinceLastInputDelivery > inputDeliveryIntervalSeconds)
 				{
-					InputPacketData &inputPacketData = inputData[i % ArrayCount(inputData)];
-					packet << inputPacketData.sequenceNumber;
-					packet << inputPacketData.horizontalAxis;
-					packet << inputPacketData.verticalAxis;
-					packet << inputPacketData.buttonBits;
+					secondsSinceLastInputDelivery = 0.0f;
+
+					OutputMemoryStream packet;
+					packet << ClientMessage::Input;
+
+					for (uint32 i = inputDataFront; i < inputDataBack; ++i)
+					{
+						InputPacketData& inputPacketData = inputData[i % ArrayCount(inputData)];
+						packet << inputPacketData.sequenceNumber;
+						packet << inputPacketData.horizontalAxis;
+						packet << inputPacketData.verticalAxis;
+						packet << inputPacketData.buttonBits;
+					}
+
+					// Clear the queue
+					inputDataFront = inputDataBack;
+
+					sendPacket(packet, serverAddress);
 				}
-
-				// Clear the queue
-				inputDataFront = inputDataBack;
-
-				sendPacket(packet, serverAddress);
 			}
 		}
 	}
 
 	// Make the camera focus the player game object
-	GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+	GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 	if (playerGameObject != nullptr)
 	{
 		App->modRender->cameraPosition = playerGameObject->position;
