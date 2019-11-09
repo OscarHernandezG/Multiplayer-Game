@@ -33,33 +33,42 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		case ReplicationAction::None:
 			break;
 		case ReplicationAction::Create:
-			packet << go->position.x;
-			packet << go->position.y;
+			if (go)
+			{
+				LOG("Writting GO Creation from server");
 
-			packet << go->angle;
+				packet << go->position.x;
+				packet << go->position.y;
 
-			packet << go->order;
+				packet << go->angle;
 
-			packet << go->pivot.x;
-			packet << go->pivot.y;
+				packet << go->order;
 
-			packet << go->size.x;
-			packet << go->size.y;
+				packet << go->pivot.x;
+				packet << go->pivot.y;
 
-			packet << go->color.r;
-			packet << go->color.g;
-			packet << go->color.b;
-			packet << go->color.a;
+				packet << go->size.x;
+				packet << go->size.y;
 
-			packet << go->tag;
+				packet << go->color.r;
+				packet << go->color.g;
+				packet << go->color.b;
+				packet << go->color.a;
+
+				packet << go->tag;
+
+			}
 
 			break;
 		case ReplicationAction::Update:
-			packet << go->position.x;
-			packet << go->position.y;
+			if (go)
+			{
 
-			packet << go->angle;
+				packet << go->position.x;
+				packet << go->position.y;
 
+				packet << go->angle;
+			}
 			break;
 		case ReplicationAction::Destroy:
 			break;

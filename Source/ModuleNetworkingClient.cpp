@@ -155,10 +155,9 @@ void ModuleNetworkingClient::onUpdate()
 	}
 	else if (state == ClientState::Playing)
 	{
-		lastPacketReceivedTime += Time.deltaTime;
 
 		// Disconect from server since we have no response
-		if (lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
+		if (Time.time - lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
 		{
 			disconnect();
 		}

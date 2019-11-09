@@ -54,6 +54,8 @@ private:
 
 		uint32 nextExpectedInputSequenceNumber = 0;
 		InputController gamepad;
+
+		ReplicationManagerServer replicationManager;
 	};
 
 	ClientProxy clientProxies[MAX_CLIENTS];
@@ -110,7 +112,7 @@ private:
 
 	float secondsSinceLastPing = 0.0f;
 	
-	float replicationDeliveryIntervalSeconds = 0.1f;
+	float replicationDeliveryIntervalSeconds = 0.f;
 };
 
 
