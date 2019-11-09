@@ -138,7 +138,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 
 					// TODO(jesus): Notify the new client proxy's replication manager about the creation of this game object
-					clientProxies[i].replicationManager.create(gameObject->networkId);
+					proxy->replicationManager.create(gameObject->networkId);
 
 				}
 
@@ -220,7 +220,7 @@ void ModuleNetworkingServer::onUpdate()
 				//              has pending data, write and send a replication packet to this client.
 				if (replicationDeliveryIntervalSeconds > REPLICATION_INTERVAL_SECONDS && !clientProxy.replicationManager.commandList.empty())
 				{
-					replicationDeliveryIntervalSeconds = 0.f;
+					replicationDeliveryIntervalSeconds = .0f;
 
 					OutputMemoryStream packet;
 					packet << ServerMessage::Replication;
