@@ -15,19 +15,20 @@ void ReplicationManagerServer::update(uint32 networkId)
 
 void ReplicationManagerServer::destroy(uint32 networkId)
 {
-	commandList.push_back(new ReplicationCommand(ReplicationAction::Create, networkId));
+	commandList.push_back(new ReplicationCommand(ReplicationAction::Destroy, networkId));
 }
 
 
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet)
 {
+	int size = commandList.size();
+	packet << size;
+
 	for (list<ReplicationCommand*>::iterator it = commandList.begin(); it != commandList.end(); ++it)
 	{
-		packet << (*it)->networkId;
-		packet << (*it)->action;
-
 		GameObject* go = App->modLinkingContext->getNetworkGameObject((*it)->networkId);
+
 		switch ((*it)->action)
 		{
 		case ReplicationAction::None:
@@ -35,7 +36,8 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		case ReplicationAction::Create:
 			if (go)
 			{
-				LOG("Writting GO Creation from server");
+				packet << (*it)->networkId;
+				packet << (*it)->action;
 
 				packet << go->position.x;
 				packet << go->position.y;
@@ -55,31 +57,38 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 				packet << go->color.b;
 				packet << go->color.a;
 
+				packet << go->textureType;
+
 				packet << go->tag;
-
 			}
-
+			else packet << -1;
 			break;
 		case ReplicationAction::Update:
 			if (go)
 			{
+				packet << (*it)->networkId;
+				packet << (*it)->action;
 
 				packet << go->position.x;
 				packet << go->position.y;
 
 				packet << go->angle;
 			}
+			else packet << -1;
 			break;
 		case ReplicationAction::Destroy:
+
+			packet << (*it)->networkId;
+			packet << (*it)->action;
+
 			break;
 		default:
 			break;
 		}
 
-		delete *it;
+		delete* it;
 		*it = nullptr;
 	}
 
 	commandList.clear();
-
 }

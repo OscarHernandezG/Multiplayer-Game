@@ -191,15 +191,18 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 void ModuleNetworkingServer::onUpdate()
 {
-	replicationDeliveryIntervalSeconds += Time.deltaTime;
 	if (state == ServerState::Listening)
 	{
-		secondsSinceLastPing += Time.deltaTime;
 		// Replication
-		for (ClientProxy& clientProxy : clientProxies)
+		int j = 0;
+		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
+			ClientProxy& clientProxy = clientProxies[i];
+
 			if (clientProxy.connected)
 			{
+				clientProxy.secondsSinceLastReplication += Time.deltaTime;
+
 				if (Time.time - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
 				{
 					destroyClientProxy(&clientProxy);
@@ -214,13 +217,11 @@ void ModuleNetworkingServer::onUpdate()
 					sendPacket(ping, clientProxy.address);
 				}
 
-
-
 				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
 				//              has pending data, write and send a replication packet to this client.
-				if (replicationDeliveryIntervalSeconds > REPLICATION_INTERVAL_SECONDS && !clientProxy.replicationManager.commandList.empty())
+				if (clientProxy.secondsSinceLastReplication >= replicationDeliveryIntervalSeconds && !clientProxy.replicationManager.commandList.empty())
 				{
-					replicationDeliveryIntervalSeconds = .0f;
+					clientProxy.secondsSinceLastReplication = 0;
 
 					OutputMemoryStream packet;
 					packet << ServerMessage::Replication;
@@ -228,12 +229,19 @@ void ModuleNetworkingServer::onUpdate()
 					clientProxy.replicationManager.write(packet);
 
 					sendPacket(packet, clientProxy.address);
+					j++;
 				}
 			}
 		}
 
 		if (secondsSinceLastPing > PING_INTERVAL_SECONDS)
-			secondsSinceLastPing = .0f;
+			secondsSinceLastPing = 0.0f;
+		secondsSinceLastPing += Time.deltaTime;
+
+		//if (secondsSinceLastReplication >= replicationDeliveryIntervalSeconds)
+		//	secondsSinceLastReplication = 0.0f;
+		//secondsSinceLastReplication += Time.deltaTime;
+
 	}
 }
 
@@ -340,14 +348,21 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 	clientProxy.gameObject->size = { 100, 100 };
 	clientProxy.gameObject->angle = 45.0f;
 
-	if (spaceshipType == 0) {
+	if (spaceshipType == 0) 
+	{
 		clientProxy.gameObject->texture = App->modResources->spacecraft1;
+		clientProxy.gameObject->textureType = TextureType::Spacecraft1;
+
 	}
-	else if (spaceshipType == 1) {
+	else if (spaceshipType == 1) 
+	{
 		clientProxy.gameObject->texture = App->modResources->spacecraft2;
+		clientProxy.gameObject->textureType = TextureType::Spacecraft2;
 	}
-	else {
+	else 
+	{
 		clientProxy.gameObject->texture = App->modResources->spacecraft3;
+		clientProxy.gameObject->textureType = TextureType::Spacecraft3;
 	}
 
 	// Create collider
@@ -367,7 +382,8 @@ GameObject * ModuleNetworkingServer::spawnPlayer(ClientProxy &clientProxy, uint8
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
-			clientProxies[i].replicationManager.create(clientProxy.gameObject->networkId);
+			if (clientProxy.clientId != clientProxies[i].clientId)
+				clientProxies[i].replicationManager.create(clientProxy.gameObject->networkId);
 		}
 	}
 
@@ -382,6 +398,7 @@ GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
 	gameObject->angle = parent->angle;
 	gameObject->position = parent->position;
 	gameObject->texture = App->modResources->laser;
+	gameObject->textureType = TextureType::Laser;
 	gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
 
 	// Create behaviour
@@ -429,16 +446,16 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 	Destroy(gameObject);
 }
 
-void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
+void ModuleNetworkingServer::updateNetworkObject(GameObject* gameObject)
 {
 	// Notify all client proxies' replication manager to destroy the object remotely
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
+		
 		if (clientProxies[i].connected)
 		{
 			// TODO(jesus): Notify this proxy's replication manager about the update of this game object
 			clientProxies[i].replicationManager.update(gameObject->networkId);
-
 		}
 	}
 }
@@ -448,14 +465,14 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 // Global update / destruction of game objects
 //////////////////////////////////////////////////////////////////////
 
-void NetworkUpdate(GameObject * gameObject)
+void NetworkUpdate(GameObject* gameObject)
 {
 	ASSERT(App->modNetServer->isConnected());
 
 	App->modNetServer->updateNetworkObject(gameObject);
 }
 
-void NetworkDestroy(GameObject * gameObject)
+void NetworkDestroy(GameObject* gameObject)
 {
 	ASSERT(App->modNetServer->isConnected());
 

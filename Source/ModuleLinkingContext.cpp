@@ -30,8 +30,8 @@ void ModuleLinkingContext::registerNetworkGameObjectWithNetworkId(GameObject * g
 GameObject * ModuleLinkingContext::getNetworkGameObject(uint32 networkId)
 {
 	uint16 arrayIndex = arrayIndexFromNetworkId(networkId);
-	ASSERT(arrayIndex < MAX_NETWORK_OBJECTS);
-
+	///ASSERT(arrayIndex < MAX_NETWORK_OBJECTS);
+	if (arrayIndex >= MAX_NETWORK_OBJECTS) return nullptr;
 	GameObject *gameObject = networkGameObjects[arrayIndex];
 
 	if (gameObject != nullptr && gameObject->networkId == networkId)

@@ -46,7 +46,7 @@ private:
 	{
 		bool connected = false;
 		sockaddr_in address;
-		uint32 clientId;
+		uint32 clientId = 0;
 		std::string name;
 		GameObject *gameObject = nullptr;
 		double lastPacketReceivedTime = 0.0f;
@@ -112,7 +112,8 @@ private:
 
 	float secondsSinceLastPing = 0.0f;
 	
-	float replicationDeliveryIntervalSeconds = 0.f;
+	float replicationDeliveryIntervalSeconds = 0.01f;
+	float secondsSinceLastReplication = 0.0f;
 };
 
 

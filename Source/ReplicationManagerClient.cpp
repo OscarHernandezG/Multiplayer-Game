@@ -3,71 +3,99 @@
 
 void ReplicationManagerClient::Read(const InputMemoryStream& packet)
 {
-	uint32 networkId; packet >> networkId;
+	int size;
+	packet >> size;
 
-	ReplicationAction action; packet >> action;
-
-	switch (action)
+	for (int i = 0; i < size; ++i)
 	{
-	case ReplicationAction::None:
-		break;
-	case ReplicationAction::Create:
-	{
-		GameObject* newGo = Instantiate();
-
-		if (newGo)
+		uint32 networkId; packet >> networkId;
+		if (networkId != -1)
 		{
-			packet >> newGo->position.x;
-			packet >> newGo->position.y;
 
-			packet >> newGo->angle;
+			ReplicationAction action; packet >> action;
 
-			packet >> newGo->order;
+			switch (action)
+			{
+			case ReplicationAction::None:
+				break;
+			case ReplicationAction::Create:
+			{
+				GameObject* newGo = Instantiate();
 
-			packet >> newGo->pivot.x;
-			packet >> newGo->pivot.y;
+				if (newGo)
+				{
+					packet >> newGo->position.x;
+					packet >> newGo->position.y;
 
-			packet >> newGo->size.x;
-			packet >> newGo->size.y;
+					packet >> newGo->angle;
 
-			packet >> newGo->color.r;
-			packet >> newGo->color.g;
-			packet >> newGo->color.b;
-			packet >> newGo->color.a;
+					packet >> newGo->order;
 
-			packet >> newGo->tag;
+					packet >> newGo->pivot.x;
+					packet >> newGo->pivot.y;
 
-			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(newGo, networkId);
+					packet >> newGo->size.x;
+					packet >> newGo->size.y;
+
+					packet >> newGo->color.r;
+					packet >> newGo->color.g;
+					packet >> newGo->color.b;
+					packet >> newGo->color.a;
+
+					packet >> newGo->textureType;
+
+					switch (newGo->textureType)
+					{
+					case TextureType::Spacecraft1:
+						newGo->texture = App->modResources->spacecraft1;
+						break;
+					case TextureType::Spacecraft2:
+						newGo->texture = App->modResources->spacecraft2;
+						break;
+					case TextureType::Spacecraft3:
+						newGo->texture = App->modResources->spacecraft3;
+						break;
+					case TextureType::Laser:
+						newGo->texture = App->modResources->laser;
+						break;
+					default:
+						break;
+					}
+
+					packet >> newGo->tag;
+
+					App->modLinkingContext->registerNetworkGameObjectWithNetworkId(newGo, networkId);
+				}
+			}
+			break;
+			case ReplicationAction::Update:
+			{
+				GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+
+				if (go)
+				{
+					packet >> go->position.x;
+					packet >> go->position.y;
+
+					packet >> go->angle;
+				}
+			}
+			break;
+			case ReplicationAction::Destroy:
+			{
+				GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+
+				if (go)
+				{
+					App->modLinkingContext->unregisterNetworkGameObject(go);
+
+					Destroy(go);
+				}
+			}
+			break;
+			default:
+				break;
+			}
 		}
-	}
-	break;
-	case ReplicationAction::Update:
-	{
-		GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
-
-		if (go)
-		{
-			packet >> go->position.x;
-			packet >> go->position.y;
-					  
-			packet >> go->angle;
-
-		}
-	}
-	break;
-	case ReplicationAction::Destroy:
-	{
-		GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
-
-		if (go)
-		{
-			App->modLinkingContext->unregisterNetworkGameObject(go);
-
-			Destroy(go);
-		}
-	}
-		break;
-	default:
-		break;
 	}
 }
