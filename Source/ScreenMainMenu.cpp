@@ -14,7 +14,7 @@ static bool isValidPlayerName(const char *name)
 
 void ScreenMainMenu::gui()
 {
-	ImGui::Begin("Main Menu");
+	ImGui::Begin("Main Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
 	ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.45f);
 

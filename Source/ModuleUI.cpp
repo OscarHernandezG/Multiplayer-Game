@@ -36,7 +36,7 @@ bool ModuleUI::preUpdate()
 
 bool ModuleUI::gui()
 {
-	ImGui::Begin("Log");
+	ImGui::Begin("Log", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
 	uint32 logEntryCount = getLogEntryCount();
 	for (uint32 entryIndex = 0; entryIndex < logEntryCount; ++entryIndex)

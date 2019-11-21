@@ -149,7 +149,7 @@ bool ModuleNetworking::gui()
 {
 	if (isConnected())
 	{
-		ImGui::Begin("ModuleNetworking window");
+		ImGui::Begin("ModuleNetworking window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 		
 		ImGui::Text(" - Current time: %f", Time.time);
 		ImGui::Text(" - # Packet sent: %u", sentPacketsCount);
