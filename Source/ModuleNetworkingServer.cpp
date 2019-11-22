@@ -160,6 +160,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			// Process the input packet and update the corresponding game object
 			if (proxy != nullptr)
 			{
+				uint32 lastSeq = 0u;
 				// Read input data
 				while (packet.RemainingByteCount() > 0)
 				{
@@ -168,6 +169,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					packet >> inputData.horizontalAxis;
 					packet >> inputData.verticalAxis;
 					packet >> inputData.buttonBits;
+
+					lastSeq = inputData.sequenceNumber;
 
 					if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber)
 					{
@@ -178,6 +181,10 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
 					}
 				}
+				OutputMemoryStream lastSeqP;
+				lastSeqP << ServerMessage::Reply;
+				lastSeqP << lastSeq;
+				sendPacket(lastSeqP, fromAddress);
 			}
 		}
 

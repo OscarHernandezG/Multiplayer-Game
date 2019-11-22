@@ -130,6 +130,10 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(jesus): Handle incoming messages from server
 		if (message == ServerMessage::Replication)
 			replicationManager.Read(packet);
+		else if (message == ServerMessage::Reply)
+		{
+			packet >> inputDataFront;
+		}
 	}
 }
 
@@ -202,9 +206,6 @@ void ModuleNetworkingClient::onUpdate()
 						packet << inputPacketData.verticalAxis;
 						packet << inputPacketData.buttonBits;
 					}
-
-					// Clear the queue
-					inputDataFront = inputDataBack;
 
 					sendPacket(packet, serverAddress);
 				}
