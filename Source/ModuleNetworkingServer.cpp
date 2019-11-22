@@ -205,6 +205,8 @@ void ModuleNetworkingServer::onUpdate()
 
 				if (Time.time - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
 				{
+					
+					onConnectionReset(clientProxy.address);
 					destroyClientProxy(&clientProxy);
 				}
 
