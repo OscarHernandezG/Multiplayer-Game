@@ -1,4 +1,5 @@
 #include "Networks.h"
+#include "ModuleNetworkingClient.h"
 
 
 
@@ -17,6 +18,11 @@ void ModuleNetworkingClient::setPlayerInfo(const char * pPlayerName, uint8 pSpac
 {
 	playerName = pPlayerName;
 	spaceshipType = pSpaceshipType;
+}
+
+void ModuleNetworkingClient::SetInputDataFront(uint32 front)
+{
+	inputDataFront = front;
 }
 
 
@@ -129,11 +135,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	{
 		// TODO(jesus): Handle incoming messages from server
 		if (message == ServerMessage::Replication)
-			replicationManager.Read(packet);
-		else if (message == ServerMessage::Reply)
-		{
-			packet >> inputDataFront;
-		}
+			replicationManager.Read(packet, this);
+	
 	}
 }
 

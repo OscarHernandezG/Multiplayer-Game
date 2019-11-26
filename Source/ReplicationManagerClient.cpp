@@ -1,7 +1,7 @@
 #include "Networks.h"
 #include "ReplicationManagerClient.h"
 
-void ReplicationManagerClient::Read(const InputMemoryStream& packet)
+void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetworkingClient* client)
 {
 	int size;
 	packet >> size;
@@ -92,6 +92,14 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet)
 					Destroy(go);
 				}
 			}
+			case ReplicationAction::Notification:
+			{
+				uint32 data = 0u; packet >> data;
+
+				client->SetInputDataFront(data);				
+
+			}
+				break;
 			break;
 			default:
 				break;

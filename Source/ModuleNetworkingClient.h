@@ -14,6 +14,7 @@ public:
 
 	void setPlayerInfo(const char *playerName, uint8 spaceshipType);
 
+	void SetInputDataFront(uint32 front);
 
 
 private:
@@ -35,7 +36,6 @@ private:
 	void onConnectionReset(const sockaddr_in &fromAddress) override;
 
 	void onDisconnect() override;
-
 
 
 	//////////////////////////////////////////////////////////////////////

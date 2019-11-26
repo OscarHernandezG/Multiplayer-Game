@@ -18,6 +18,11 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 	commandList.push_back(new ReplicationCommand(ReplicationAction::Destroy, networkId));
 }
 
+void ReplicationManagerServer::notification(uint32 networkId, uint32 data)
+{
+	commandList.push_back(new ReplicationCommand(ReplicationAction::Notification, networkId, data));
+}
+
 
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet)
@@ -80,6 +85,13 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 
 			packet << (*it)->networkId;
 			packet << (*it)->action;
+
+			break;
+		case ReplicationAction::Notification:
+
+			packet << (*it)->networkId;
+			packet << (*it)->action;
+			packet << (*it)->data;
 
 			break;
 		default:
