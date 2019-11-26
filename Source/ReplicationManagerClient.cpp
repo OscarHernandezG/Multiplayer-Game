@@ -92,9 +92,11 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 					Destroy(go);
 				}
 			}
+			break;
 			case ReplicationAction::Notification:
 			{
-				uint32 data = 0u; packet >> data;
+				uint32 data = 0u;
+				packet >> data;
 
 				client->SetInputDataFront(data);				
 
