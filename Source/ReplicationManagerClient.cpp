@@ -98,10 +98,9 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 				uint32 data = 0u;
 				packet >> data;
 
-				client->SetInputDataFront(data);				
+				client->SetInputDataFront(data);
 
 			}
-				break;
 			break;
 			default:
 				break;
