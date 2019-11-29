@@ -85,12 +85,12 @@ void ModuleNetworkingServer::onGui()
 	}
 }
 
-void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress)
+void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream& packet, const sockaddr_in& fromAddress)
 {
 	if (state == ServerState::Listening)
 	{
 		// Register player
-		ClientProxy *proxy = getClientProxy(fromAddress);
+		ClientProxy* proxy = getClientProxy(fromAddress);
 
 		// Read the packet type
 		ClientMessage message;
@@ -131,11 +131,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 				// Send all network objects to the new player
 				uint16 networkGameObjectsCount;
-				GameObject *networkGameObjects[MAX_NETWORK_OBJECTS];
+				GameObject* networkGameObjects[MAX_NETWORK_OBJECTS];
 				App->modLinkingContext->getNetworkGameObjects(networkGameObjects, &networkGameObjectsCount);
 				for (uint16 i = 0; i < networkGameObjectsCount; ++i)
 				{
-					GameObject *gameObject = networkGameObjects[i];
+					GameObject* gameObject = networkGameObjects[i];
 
 					// TODO(jesus): Notify the new client proxy's replication manager about the creation of this game object
 					proxy->replicationManager.create(gameObject->networkId);
@@ -170,11 +170,12 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					packet >> inputData.verticalAxis;
 					packet >> inputData.buttonBits;
 
-					if (lastSeq < inputData.sequenceNumber)
-						lastSeq = inputData.sequenceNumber;
-
 					if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber)
 					{
+
+						if (lastSeq < inputData.sequenceNumber)
+							lastSeq = inputData.sequenceNumber;
+
 						proxy->gamepad.horizontalAxis = inputData.horizontalAxis;
 						proxy->gamepad.verticalAxis = inputData.verticalAxis;
 						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
