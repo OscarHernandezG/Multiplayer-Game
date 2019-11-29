@@ -82,5 +82,7 @@ private:
 	float secondsSinceLastPing = 0.0f;    // NOTE(jesus): Use this to implement ping to server
 
 	ReplicationManagerClient replicationManager;
+
+	DeliveryManager* deliveryManager;
 };
 

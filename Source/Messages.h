@@ -4,7 +4,8 @@ enum class ClientMessage
 {
 	Hello,
 	Input,
-	Ping
+	Ping,
+	Delivery
 };
 
 enum class ServerMessage

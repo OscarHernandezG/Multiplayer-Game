@@ -232,6 +232,7 @@ void ModuleNetworkingServer::onUpdate()
 					OutputMemoryStream packet;
 					packet << ServerMessage::Replication;
 
+					Delivery* del = clientProxy.deliveryManager.WriteSequenceNumber(packet);
 					clientProxy.replicationManager.write(packet);
 
 					sendPacket(packet, clientProxy.address);

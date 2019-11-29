@@ -59,6 +59,8 @@ void ModuleNetworkingClient::onStart()
 	secondsSinceLastInputDelivery = 0.0f;
 	secondsSinceLastPing = 0.0f;
 	lastPacketReceivedTime = Time.time;
+
+	deliveryManager = new DeliveryManager;
 }
 
 void ModuleNetworkingClient::onGui()
@@ -134,7 +136,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	else if (state == ClientState::Playing)
 	{
 		// TODO(jesus): Handle incoming messages from server
-		if (message == ServerMessage::Replication)
+		if (message == ServerMessage::Replication && deliveryManager->ProcessSequenceNumber(packet))
 			replicationManager.Read(packet, this);
 	
 	}
@@ -184,7 +186,7 @@ void ModuleNetworkingClient::onUpdate()
 				sendPacket(ping, serverAddress);
 			}
 
-			if (inputDataBack - inputDataFront < ArrayCount(inputData))
+			if (inputDataBack - inputDataFront <= ArrayCount(inputData))
 			{
 				uint32 currentInputData = inputDataBack++;
 				InputPacketData& inputPacketData = inputData[currentInputData % ArrayCount(inputData)];
@@ -213,6 +215,13 @@ void ModuleNetworkingClient::onUpdate()
 					sendPacket(packet, serverAddress);
 				}
 			}
+			
+			OutputMemoryStream packet;
+			packet << ClientMessage::Delivery;
+			deliveryManager->WriteSequenceNumber(packet);
+			sendPacket(packet, serverAddress);
+
+			deliveryManager->ProcessTimedOutPackets();
 		}
 	}
 
