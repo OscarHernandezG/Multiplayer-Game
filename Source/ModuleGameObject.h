@@ -42,6 +42,14 @@ struct GameObject
 	// Tag for custom usage
 	uint32 tag = 0;
 	
+	//For entity interpolation
+	vec2 initialPos = vec2{ 0.0f,0.0f };
+	float initialAngle = 0.0f;
+
+	vec2 finalPos = vec2{ 0.0f,0.0f };
+	float finalAngle = 0.0f;
+
+	float secondsElapsed = 0.0f;
 private:
 
 	void * operator new(size_t size) = delete;

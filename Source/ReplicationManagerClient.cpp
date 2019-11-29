@@ -74,10 +74,15 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 
 				if (go)
 				{
-					packet >> go->position.x;
-					packet >> go->position.y;
+					go->initialPos = go->position;
+					 
+					packet >> go->finalPos.x;
+					packet >> go->finalPos.y;
 
-					packet >> go->angle;
+					go->initialAngle = go->angle;
+					packet >> go->finalAngle;
+
+					go->secondsElapsed = 0.0f;;;;
 				}
 			}
 			break;
