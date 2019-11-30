@@ -49,11 +49,7 @@ bool ModuleGameObject::update()
 		if (gameObject.state == GameObject::UPDATING)
 		{
 			if (gameObject.behaviour != nullptr)
-			{
 				gameObject.behaviour->update();
-				
-				Time.time; //0.8ms
-			}
 		}
 	}
 

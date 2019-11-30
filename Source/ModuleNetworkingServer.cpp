@@ -183,7 +183,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream& packet, c
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
 					}
 				}
-				proxy->replicationManager.notification(proxy->gameObject->networkId, lastSeq);
+				if (lastSeq > 0)
+					proxy->replicationManager.notification(proxy->gameObject->networkId, lastSeq);
 			}
 		}
 
