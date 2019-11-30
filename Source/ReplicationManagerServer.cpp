@@ -66,7 +66,11 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 
 				packet << go->tag;
 			}
-			else packet << -1;
+			else
+			{
+				packet << -1;
+				packet << (*it)->action;
+			}
 			break;
 		case ReplicationAction::Update:
 			if (go)
@@ -79,7 +83,11 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 
 				packet << go->angle;
 			}
-			else packet << -1;
+			else
+			{
+				packet << -1;
+				packet << (*it)->action;
+			}
 			break;
 		case ReplicationAction::Destroy:
 

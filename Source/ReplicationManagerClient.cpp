@@ -9,16 +9,15 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 	for (int i = 0; i < size; ++i)
 	{
 		uint32 networkId; packet >> networkId;
-		if (networkId != -1)
+		ReplicationAction action; packet >> action;
+
+		switch (action)
 		{
-
-			ReplicationAction action; packet >> action;
-
-			switch (action)
-			{
-			case ReplicationAction::None:
-				break;
-			case ReplicationAction::Create:
+		case ReplicationAction::None:
+			break;
+		case ReplicationAction::Create:
+		{
+			if (networkId != -1)
 			{
 				GameObject* newGo = Instantiate();
 
@@ -69,15 +68,18 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 					App->modLinkingContext->registerNetworkGameObjectWithNetworkId(newGo, networkId);
 				}
 			}
-			break;
-			case ReplicationAction::Update:
+		}
+		break;
+		case ReplicationAction::Update:
+		{
+			if (networkId != -1)
 			{
 				GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
 
 				if (go)
 				{
 					go->initialPos = go->position;
-					 
+
 					packet >> go->finalPos.x;
 					packet >> go->finalPos.y;
 
@@ -87,31 +89,31 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 					go->secondsElapsed = 0.0f;;;;
 				}
 			}
-			break;
-			case ReplicationAction::Destroy:
+		}
+		break;
+		case ReplicationAction::Destroy:
+		{
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+
+			if (go)
 			{
-				GameObject* go = App->modLinkingContext->getNetworkGameObject(networkId);
+				App->modLinkingContext->unregisterNetworkGameObject(go);
 
-				if (go)
-				{
-					App->modLinkingContext->unregisterNetworkGameObject(go);
-
-					Destroy(go);
-				}
+				Destroy(go);
 			}
+		}
+		break;
+		case ReplicationAction::Notification:
+		{
+			uint32 data = 0u;
+			packet >> data;
+
+			client->SetInputDataFront(data);
+
+		}
+		break;
+		default:
 			break;
-			case ReplicationAction::Notification:
-			{
-				uint32 data = 0u;
-				packet >> data;
-
-				client->SetInputDataFront(data);
-
-			}
-			break;
-			default:
-				break;
-			}
 		}
 	}
 }

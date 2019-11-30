@@ -177,7 +177,7 @@ void ModuleNetworkingClient::onUpdate()
 					gameObject.secondsElapsed += Time.deltaTime;
 
 					float percentatge = gameObject.secondsElapsed / REPLICATION_INTERVAL_SECONDS;
-					if (percentatge > 1)
+					//if (percentatge > 1)
 						percentatge = 1;
 
 					gameObject.angle = ((gameObject.finalAngle - gameObject.initialAngle) * percentatge) + gameObject.initialAngle;
@@ -199,6 +199,10 @@ void ModuleNetworkingClient::onUpdate()
 
 				sendPacket(ping, serverAddress);
 			}
+
+			LOG("inputDataFront: %i", inputDataFront);
+			LOG("inputDataBack: %i", inputDataBack);
+			LOG("Difference: %i", inputDataBack - inputDataFront);
 
 			if (inputDataBack - inputDataFront <= ArrayCount(inputData))
 			{
@@ -229,6 +233,7 @@ void ModuleNetworkingClient::onUpdate()
 					sendPacket(packet, serverAddress);
 				}
 			}
+		//	else inputDataFront = inputDataBack;
 			
 			OutputMemoryStream packet;
 			packet << ClientMessage::Delivery;
@@ -236,6 +241,8 @@ void ModuleNetworkingClient::onUpdate()
 			sendPacket(packet, serverAddress);
 
 			deliveryManager->ProcessTimedOutPackets();
+
+		///	deliveryManager->ProcessTimedOutPackets();
 		}
 	}
 
