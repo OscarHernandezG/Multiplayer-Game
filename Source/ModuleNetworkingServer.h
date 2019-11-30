@@ -113,7 +113,6 @@ private:
 
 	float secondsSinceLastPing = 0.0f;
 	
-	float replicationDeliveryIntervalSeconds = 0.01f;
 	float secondsSinceLastReplication = 0.0f;
 };
 

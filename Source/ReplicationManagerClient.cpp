@@ -26,8 +26,10 @@ void ReplicationManagerClient::Read(const InputMemoryStream& packet, ModuleNetwo
 				{
 					packet >> newGo->position.x;
 					packet >> newGo->position.y;
+					newGo->finalPos = newGo->initialPos = newGo->position;
 
 					packet >> newGo->angle;
+					newGo->finalAngle = newGo->initialAngle = newGo->angle;
 
 					packet >> newGo->order;
 

@@ -51,8 +51,8 @@ void ModuleNetworkingServer::onGui()
 
 		ImGui::Separator();
 
-		ImGui::Text("Replication");
-		ImGui::InputFloat("Delivery interval (s)", &replicationDeliveryIntervalSeconds, 0.01f, 0.1f);
+		//ImGui::Text("Replication");
+		//ImGui::InputFloat("Delivery interval (s)", &replicationDeliveryIntervalSeconds, 0.01f, 0.1f);
 		
 		ImGui::Separator();
 
@@ -226,7 +226,7 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
 				//              has pending data, write and send a replication packet to this client.
-				if (clientProxy.secondsSinceLastReplication >= replicationDeliveryIntervalSeconds && !clientProxy.replicationManager.commandList.empty())
+				if (clientProxy.secondsSinceLastReplication >= REPLICATION_INTERVAL_SECONDS && !clientProxy.replicationManager.commandList.empty())
 				{
 					clientProxy.secondsSinceLastReplication = 0;
 
