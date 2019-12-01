@@ -54,6 +54,7 @@ struct Spaceship : public Behaviour
 			// the client proxy will poing to an invalid gameObject...
 			// instead, make the gameObject invisible or disconnect the client.
 			App->modNetServer->DisconectClient(c1.gameObject);
+
 		}
 	}
 };

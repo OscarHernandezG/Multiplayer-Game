@@ -18,6 +18,12 @@ void ModuleNetworkingServer::DisconectClient(GameObject* object)
 
 	if (proxy)
 	{
+		OutputMemoryStream output;
+		output << ServerMessage::Disconnect;
+		output << Disconnection::Death;
+		
+		sendPacket(output, proxy->address);
+
 		DisconectClient(proxy);
 	}
 }
