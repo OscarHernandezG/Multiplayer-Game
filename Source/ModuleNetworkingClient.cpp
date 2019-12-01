@@ -88,7 +88,7 @@ void ModuleNetworkingClient::onGui()
 			ImGui::Text(" - Network id: %u", networkId);
 
 			vec2 playerPosition = {};
-			GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 			if (playerGameObject != nullptr) {
 				playerPosition = playerGameObject->position;
 			}
@@ -104,6 +104,19 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Text("Input:");
 			ImGui::InputFloat("Delivery interval (s)", &inputDeliveryIntervalSeconds, 0.01f, 0.1f, 4);
+
+		}
+	}
+	if (isDisconnected)
+	{
+		if (ImGui::Begin("Died", &isDisconnected, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove))
+		{
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
+			ImGui::Text("YOU DIED!");
+			ImGui::Separator();
+			ImGui::PopStyleColor();
+
+			ImGui::End();
 		}
 	}
 }
@@ -136,7 +149,14 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(jesus): Handle incoming messages from server
 		if (message == ServerMessage::Replication && deliveryManager->ProcessSequenceNumber(packet))
 			replicationManager.Read(packet, this);
-	
+
+		else if (message == ServerMessage::Disconnect)
+		{
+			Disconnection reason; packet >> reason;
+
+			if (reason == Disconnection::Death)
+				isDisconnected = true;
+		}
 	}
 }
 
@@ -241,8 +261,6 @@ void ModuleNetworkingClient::onUpdate()
 			sendPacket(packet, serverAddress);
 
 			deliveryManager->ProcessTimedOutPackets();
-
-		///	deliveryManager->ProcessTimedOutPackets();
 		}
 	}
 
@@ -276,4 +294,6 @@ void ModuleNetworkingClient::onDisconnect()
 	}
 
 	App->modRender->cameraPosition = {};
+
+	isDisconnected = false;
 }
