@@ -233,7 +233,7 @@ void ModuleNetworkingClient::onUpdate()
 					sendPacket(packet, serverAddress);
 				}
 			}
-		//	else inputDataFront = inputDataBack;
+			else inputDataFront = inputDataBack;
 			
 			OutputMemoryStream packet;
 			packet << ClientMessage::Delivery;
