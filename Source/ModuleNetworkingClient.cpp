@@ -109,7 +109,7 @@ void ModuleNetworkingClient::onGui()
 	}
 	if (isDisconnected)
 	{
-		if (ImGui::Begin("Died", &isDisconnected, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove))
+		if (ImGui::Begin("Died", &isDisconnected, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
 		{
 			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
 			ImGui::Text("YOU DIED!");
@@ -219,10 +219,6 @@ void ModuleNetworkingClient::onUpdate()
 
 				sendPacket(ping, serverAddress);
 			}
-
-			LOG("inputDataFront: %i", inputDataFront);
-			LOG("inputDataBack: %i", inputDataBack);
-			LOG("Difference: %i", inputDataBack - inputDataFront);
 
 			if (inputDataBack - inputDataFront <= ArrayCount(inputData))
 			{
