@@ -12,6 +12,16 @@ void ModuleNetworkingServer::setListenPort(int port)
 	listenPort = port;
 }
 
+void ModuleNetworkingServer::DisconectClient(GameObject* object)
+{
+	ModuleNetworkingServer::ClientProxy* proxy = GetProxy(object);
+
+	if (proxy)
+	{
+		DisconectClient(proxy);
+	}
+}
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -212,8 +222,7 @@ void ModuleNetworkingServer::onUpdate()
 				if (Time.time - clientProxy.lastPacketReceivedTime > DISCONNECT_TIMEOUT_SECONDS)
 				{
 					
-					onConnectionReset(clientProxy.address);
-					destroyClientProxy(&clientProxy);
+					DisconectClient(&clientProxy);
 				}
 
 
@@ -253,6 +262,23 @@ void ModuleNetworkingServer::onUpdate()
 
 	}
 }
+
+void ModuleNetworkingServer::DisconectClient(ModuleNetworkingServer::ClientProxy* clientProxy)
+{
+	onConnectionReset(clientProxy->address);
+	destroyClientProxy(clientProxy);
+}
+
+ModuleNetworkingServer::ClientProxy* ModuleNetworkingServer::GetProxy(GameObject* object)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (clientProxies[i].gameObject == object)
+			return &clientProxies[i];
+	}
+	return nullptr;
+}
+
 
 void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)
 {

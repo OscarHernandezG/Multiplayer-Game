@@ -13,7 +13,7 @@ public:
 	void setListenPort(int port);
 
 
-
+	void DisconectClient(GameObject* object);
 private:
 
 	//////////////////////////////////////////////////////////////////////
@@ -26,11 +26,13 @@ private:
 
 	void onGui() override;
 
-	void onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress) override;
+	void onPacketReceived(const InputMemoryStream& packet, const sockaddr_in& fromAddress) override;
 
 	void onUpdate() override;
 
-	void onConnectionReset(const sockaddr_in &fromAddress) override;
+
+
+	void onConnectionReset(const sockaddr_in& fromAddress) override;
 
 	void onDisconnect() override;
 
@@ -48,7 +50,7 @@ private:
 		sockaddr_in address;
 		uint32 clientId = 0;
 		std::string name;
-		GameObject *gameObject = nullptr;
+		GameObject* gameObject = nullptr;
 		double lastPacketReceivedTime = 0.0f;
 		float secondsSinceLastReplication = 0.0f;
 
@@ -61,12 +63,14 @@ private:
 
 	ClientProxy clientProxies[MAX_CLIENTS];
 
-	ClientProxy * createClientProxy();
+	ClientProxy* createClientProxy();
 
-	ClientProxy * getClientProxy(const sockaddr_in &clientAddress);
+	ClientProxy* getClientProxy(const sockaddr_in& clientAddress);
 
-	void destroyClientProxy(ClientProxy * proxy);
+	void destroyClientProxy(ClientProxy* proxy);
 
+	ClientProxy* GetProxy(GameObject* object);
+	void DisconectClient(ModuleNetworkingServer::ClientProxy* clientProxy);
 
 
 public:
@@ -75,9 +79,9 @@ public:
 	// Spawning network objects
 	//////////////////////////////////////////////////////////////////////
 
-	GameObject * spawnPlayer(ClientProxy &clientProxy, uint8 spaceshipType);
+	GameObject* spawnPlayer(ClientProxy& clientProxy, uint8 spaceshipType);
 
-	GameObject * spawnBullet(GameObject *parent);
+	GameObject* spawnBullet(GameObject* parent);
 
 	// NOTE(jesus): Here go spawn methods for each type of network objects
 
@@ -89,11 +93,11 @@ private:
 	// Updating / destroying network objects
 	//////////////////////////////////////////////////////////////////////
 
-	void destroyNetworkObject(GameObject *gameObject);
-	friend void (NetworkDestroy)(GameObject *);
+	void destroyNetworkObject(GameObject* gameObject);
+	friend void (NetworkDestroy)(GameObject*);
 
-	void updateNetworkObject(GameObject *gameObject);
-	friend void (NetworkUpdate)(GameObject *);
+	void updateNetworkObject(GameObject* gameObject);
+	friend void (NetworkUpdate)(GameObject*);
 
 
 
@@ -112,7 +116,7 @@ private:
 	uint16 listenPort = 0;
 
 	float secondsSinceLastPing = 0.0f;
-	
+
 	float secondsSinceLastReplication = 0.0f;
 };
 
